@@ -53,9 +53,15 @@ public class LoginController {
                 redirectAttributes.addFlashAttribute("message","The email already exists please try a different one!");
                 return "register";
             }
-            adminService.save(adminDto);
-            model.addAttribute("adminDto", adminDto);
-            redirectAttributes.addFlashAttribute("message","SignUp successfully!");
+            if (adminDto.getPassword().equals(adminDto.getRepeatPassword())){
+                adminService.save(adminDto);
+                model.addAttribute("adminDto", adminDto);
+                redirectAttributes.addFlashAttribute("message","SignUp successfully!");
+            } else {
+                model.addAttribute("adminDto", adminDto);
+                redirectAttributes.addFlashAttribute("message","The passwords entered do not match!");
+                return "register";
+            }
         } catch (Exception exception){
             redirectAttributes.addFlashAttribute("message","Oops! Registration failed due to a server error!");
         }
