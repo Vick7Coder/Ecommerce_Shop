@@ -6,12 +6,14 @@ import com.vick7.library.model.Role;
 import com.vick7.library.repository.AdminRepository;
 import com.vick7.library.repository.RoleRepository;
 import com.vick7.library.service.AdminService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
 @Service
 public class AdminServiceImpl implements AdminService {
+    private BCryptPasswordEncoder passwordEncoder;
     private AdminRepository adminRepository;
     private RoleRepository roleRepository;
     public AdminServiceImpl(AdminRepository adminRepository, RoleRepository roleRepository){
@@ -29,7 +31,7 @@ public class AdminServiceImpl implements AdminService {
         admin.setFirstName(adminDto.getFirstName());
         admin.setLastName(adminDto.getLastName());
         admin.setUsername(adminDto.getUsername());
-        admin.setPassword(adminDto.getPassword());
+        admin.setPassword(passwordEncoder.encode(adminDto.getPassword()));
         admin.setRoles(Arrays.asList(roleRepository.findByName("ADMIN")));
         return adminRepository.save(admin);
     }
