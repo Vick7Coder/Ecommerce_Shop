@@ -3,7 +3,9 @@ package com.vick7.admin.controller;
 import com.vick7.library.dto.AdminDto;
 import com.vick7.library.model.Admin;
 import com.vick7.library.service.impl.AdminServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,8 +17,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController {
     private AdminServiceImpl adminService;
-    public LoginController(AdminServiceImpl adminService){
+
+    private BCryptPasswordEncoder passwordEncoder;
+    public LoginController(AdminServiceImpl adminService, BCryptPasswordEncoder passwordEncoder){
         this.adminService = adminService;
+        this.passwordEncoder = passwordEncoder;
     }
     @GetMapping("/login")
     public String loginForm(){
@@ -39,31 +44,35 @@ public class LoginController {
     @PostMapping("/register-new")
     public String addNewAdmin(@Valid @ModelAttribute("adminDto")AdminDto adminDto, BindingResult result,
                               Model model,
-                              RedirectAttributes redirectAttributes
+                              HttpSession session
                               ){
         try {
+            session.removeAttribute("message");
             if (result.hasErrors()){
                 model.addAttribute("adminDto", adminDto);
+                result.toString();
                 return "register";
             }
             String username = adminDto.getUsername();
             Admin admin = adminService.findByUsername(username);
             if (admin!=null){
                 model.addAttribute("adminDto", adminDto);
-                redirectAttributes.addFlashAttribute("message","The email already exists please try a different one!");
+                session.setAttribute("message","The email already exists please try a different one!");
                 return "register";
             }
             if (adminDto.getPassword().equals(adminDto.getRepeatPassword())){
+                adminDto.setPassword(passwordEncoder.encode(adminDto.getPassword()));
                 adminService.save(adminDto);
                 model.addAttribute("adminDto", adminDto);
-                redirectAttributes.addFlashAttribute("message","SignUp successfully!");
+                session.setAttribute("message","SignUp successfully!");
             } else {
                 model.addAttribute("adminDto", adminDto);
-                redirectAttributes.addFlashAttribute("message","The passwords entered do not match!");
+                session.setAttribute("message", "The passwords entered do not match!");
                 return "register";
             }
         } catch (Exception exception){
-            redirectAttributes.addFlashAttribute("message","Oops! Registration failed due to a server error!");
+            exception.printStackTrace();
+            session.setAttribute("message","Oops! Registration failed due to a server error!");
         }
         return "register";
     }
