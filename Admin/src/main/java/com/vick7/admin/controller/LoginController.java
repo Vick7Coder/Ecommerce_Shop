@@ -43,11 +43,9 @@ public class LoginController {
 
     @PostMapping("/register-new")
     public String addNewAdmin(@Valid @ModelAttribute("adminDto")AdminDto adminDto, BindingResult result,
-                              Model model,
-                              HttpSession session
+                              Model model
                               ){
         try {
-            session.removeAttribute("message");
             if (result.hasErrors()){
                 model.addAttribute("adminDto", adminDto);
                 result.toString();
@@ -57,22 +55,22 @@ public class LoginController {
             Admin admin = adminService.findByUsername(username);
             if (admin!=null){
                 model.addAttribute("adminDto", adminDto);
-                session.setAttribute("message","The email already exists please try a different one!");
+                model.addAttribute("emailError","The email already exists please try a different one!");
                 return "register";
             }
             if (adminDto.getPassword().equals(adminDto.getRepeatPassword())){
                 adminDto.setPassword(passwordEncoder.encode(adminDto.getPassword()));
                 adminService.save(adminDto);
                 model.addAttribute("adminDto", adminDto);
-                session.setAttribute("message","SignUp successfully!");
+                model.addAttribute("success","SignUp successfully!");
             } else {
                 model.addAttribute("adminDto", adminDto);
-                session.setAttribute("message", "The passwords entered do not match!");
+                model.addAttribute("passError", "The passwords entered do not match!");
                 return "register";
             }
-        } catch (Exception exception){
+        } catch (Exception exception) {
             exception.printStackTrace();
-            session.setAttribute("message","Oops! Registration failed due to a server error!");
+            model.addAttribute("serverError", "Oops! Registration failed due to a server error!");
         }
         return "register";
     }
