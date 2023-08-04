@@ -6,6 +6,7 @@ import com.vick7.library.model.Role;
 import com.vick7.library.repository.AdminRepository;
 import com.vick7.library.repository.RoleRepository;
 import com.vick7.library.service.AdminService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,11 @@ import java.util.Arrays;
 
 @Service
 public class AdminServiceImpl implements AdminService {
+    @Autowired
     private AdminRepository adminRepository;
+    @Autowired
     private RoleRepository roleRepository;
-    public AdminServiceImpl(AdminRepository adminRepository, RoleRepository roleRepository){
-        this.adminRepository = adminRepository;
-        this.roleRepository = roleRepository;
-    }
+
     @Override
     public Admin findByUsername(String username) {
         return adminRepository.findByUsername(username);
